@@ -8,8 +8,9 @@ import {
 import { useExactTimestamp } from 'shared/composables/useExactTimestamp';
 import { useAdmin } from 'dashboard/composables/useAdmin';
 import ContactInfoRow from './ContactInfoRow.vue';
+import ViewAllConversations from './ViewAllConversations.vue';
 import Avatar from 'next/avatar/Avatar.vue';
-import SocialIcons from './SocialIcons.vue';
+import SocialProfileLinks from 'dashboard/components-next/social-profiles/SocialProfileLinks.vue';
 import EditContact from './EditContact.vue';
 import ContactMergeModal from 'dashboard/modules/contact/ContactMergeModal.vue';
 import ContactDeleteModal from 'dashboard/modules/contact/ContactDeleteModal.vue';
@@ -22,10 +23,11 @@ export default {
   components: {
     NextButton,
     ContactInfoRow,
+    ViewAllConversations,
     EditContact,
     Avatar,
     ComposeConversation,
-    SocialIcons,
+    SocialProfileLinks,
     ContactMergeModal,
     ContactDeleteModal,
     VoiceCallButton,
@@ -95,6 +97,17 @@ export default {
         twitter,
         telegram,
       };
+    },
+    whatsappUsername() {
+      const username =
+        this.socialProfiles.whatsapp ||
+        this.additionalAttributes.social_whatsapp_user_name ||
+        '';
+
+      return username.toString().replace(/^@+/, '');
+    },
+    formattedWhatsappUsername() {
+      return this.whatsappUsername ? `@${this.whatsappUsername}` : '';
     },
   },
   watch: {
@@ -273,6 +286,14 @@ export default {
             @update="value => onFieldUpdate('phone_number', value)"
           />
           <ContactInfoRow
+            v-if="formattedWhatsappUsername"
+            :value="formattedWhatsappUsername"
+            icon="brand-whatsapp"
+            emoji="💬"
+            :title="$t('CONTACT_PANEL.WHATSAPP_USERNAME')"
+            show-copy
+          />
+          <ContactInfoRow
             v-if="contact.identifier"
             :value="contact.identifier"
             icon="contact-identify"
@@ -302,7 +323,7 @@ export default {
             emoji="🌍"
             :title="$t('CONTACT_PANEL.LOCATION')"
           />
-          <SocialIcons :social-profiles="socialProfiles" />
+          <SocialProfileLinks :profiles="socialProfiles" class="my-2" />
         </div>
       </div>
       <div class="flex items-center w-full mt-0.5 gap-2">
@@ -317,11 +338,12 @@ export default {
             />
           </template>
         </ComposeConversation>
+        <ViewAllConversations />
         <VoiceCallButton
           :phone="contact.phone_number"
           :contact-id="contact.id"
           :conversation-id="currentChat?.id"
-          icon="i-lucide-phone"
+          icon="i-ph-phone"
           sm
           faded
           slate
